@@ -98,7 +98,7 @@ def meta():
     )]
 
     colleges = [dict(r) for r in db.execute(
-        """SELECT instcode AS code, MIN(name_of_institution) AS name FROM colleges
+        """SELECT instcode AS code, MIN(name_of_institution) AS name, MIN(dist) AS dist FROM colleges
            WHERE instcode IS NOT NULL AND instcode != ''
            GROUP BY instcode
            ORDER BY instcode"""

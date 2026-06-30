@@ -73,7 +73,7 @@
           <form id="predict-form" class="predict-form" autocomplete="off">
 
             <div class="field-group">
-              <label for="rank">Your EAPCET rank</label>
+              <label for="rank">Your EAPCET rank <span class="optional">(optional)</span></label>
               <input
                 type="number"
                 id="rank"
@@ -81,9 +81,8 @@
                 inputmode="numeric"
                 min="1"
                 placeholder="e.g. 45210"
-                required
               >
-              <span class="field-hint">Lower rank = better. We'll show colleges whose cutoff is at or above this number.</span>
+              <span class="field-hint">Leave blank to browse all cutoffs. Otherwise, we show colleges whose cutoff is at or above your rank.</span>
             </div>
 
             <div class="field-row">

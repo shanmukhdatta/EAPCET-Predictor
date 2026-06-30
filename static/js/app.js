@@ -36,6 +36,23 @@ function districtLabel(code) {
   return DISTRICT_NAMES[code] ? `${code} (${DISTRICT_NAMES[code]})` : code;
 }
 
+let allColleges = [];
+
+function updateCollegesDropdown() {
+  const selectedDistrict = els.district.value || "ALL";
+  let filtered = allColleges;
+  if (selectedDistrict !== "ALL") {
+    filtered = allColleges.filter((c) => c.dist === selectedDistrict);
+  }
+  fillSelect(els.college, filtered, {
+    value: (c) => c.code,
+    label: (c) => `${c.code} (${c.name})`,
+    placeholderKept: true,
+  });
+  els.college.value = "ALL";
+}
+
+
 
 const els = {
   category: document.getElementById("category"),
@@ -88,7 +105,9 @@ async function loadMeta() {
     placeholderKept: true,
   });
 
-  fillSelect(els.college, meta.colleges, {
+  allColleges = meta.colleges || [];
+
+  fillSelect(els.college, allColleges, {
     value: (c) => c.code,
     label: (c) => `${c.code} (${c.name})`,
     placeholderKept: true,
@@ -188,7 +207,10 @@ els.form.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearError();
 
-  const rank = document.getElementById("rank").value.trim();
+  let rank = document.getElementById("rank").value.trim();
+  if (rank === "") {
+    rank = "1";
+  }
   const category = els.category.value;
   const gender = els.gender.value;
   const district = els.district.value || "ALL";
@@ -196,7 +218,7 @@ els.form.addEventListener("submit", async (e) => {
   const college = els.college.value || "ALL";
   const year = els.year.value;
 
-  if (!rank || Number(rank) <= 0) {
+  if (Number(rank) <= 0) {
     showError("Please enter your EAPCET rank as a positive number.");
     return;
   }
@@ -274,6 +296,7 @@ function initCountUp() {
   setGender("boys");
   try {
     await loadMeta();
+    els.district.addEventListener("change", updateCollegesDropdown);
   } catch (err) {
     showError("Could not load filter options from the server.");
   }

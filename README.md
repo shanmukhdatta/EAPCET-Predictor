@@ -1,19 +1,36 @@
 # AP EAPCET College Predictor
 
-A web app that takes a student's EAPCET rank, category, and gender, and
-returns every (college, branch) combination they would have qualified for
-based on official closing-rank data — built from the real AP EAPCET "Last
-Rank Details" allotment PDF.
-
-```
-Rank + Category + Gender + (District) + (Branch)  ──►  Matching colleges,
-                                                          sorted by closest
-                                                          cutoff first
-```
+An elegant, single-page web application designed for students in Andhra Pradesh to predict engineering college and branch admissions based on their AP EAPCET rank, category, and gender. The tool queries official past allotment data to display matching colleges whose closing ranks are equal to or greater than the candidate's rank.
 
 ---
 
-## Project structure
+## About the Project
+
+Choosing the right engineering college during counseling can be overwhelming. The AP EAPCET College Predictor simplifies this by matching your counseling details against the official cutoff reports. Instead of manually scrolling through dense, multi-page PDFs, students can filter and sort through thousands of combinations in a split second.
+
+The frontend is a lightweight, responsive single-page dashboard styled with a deep indigo and warm marigold theme. The backend is powered by a Flask micro-service using an optimized local SQLite database loaded directly from official counseling notifications.
+
+---
+
+## How It Works
+
+1. **Official PDF Parsing**: The raw "Last Rank Details" PDF published by the admission board is parsed table-by-table to extract raw allotment entries.
+2. **Database Conversion**: The parsed records are loaded into a structured, indexed SQLite database containing details for each college (code, affiliation, location, fee) and category-specific closing ranks (OC, EWS, SC, ST, BC groups).
+3. **Smart Matching**: A candidate enters their rank, category, gender, and optional filters (district, branch). The predictor queries the database for rows where the candidate's rank is within (less than or equal to) the last year's closing rank for their category.
+4. **Closest Cutoff Sorting**: Results are sorted in ascending order of the closing rank, ensuring that the most realistic options (where the cutoff is closest to the candidate's rank) appear at the very top.
+
+---
+
+## Custom Features
+
+* **District Full Names**: Dropdown filter options dynamically map abbreviation codes (like CTR, VSP, EG) to their full names, e.g. `VSP (Visakhapatnam)`, making navigation intuitive.
+* **Developer Integration**: Custom responsive footer credit linking directly to the developer, **Shanmukh Datta** (LinkedIn & GitHub Repository), integrated into the core color theme.
+
+---
+
+## Project Technical Details and Structure
+
+### File Directory
 
 ```
 eapcet-predictor/
@@ -43,14 +60,11 @@ eapcet-predictor/
     └── js/app.js              # form handling, API calls, results rendering
 ```
 
-The pipeline is intentionally three separate steps (PDF → CSV → DB → app)
-rather than one script, so you can inspect and sanity-check the CSV before
-it ever touches the database, and so adding a new year never requires
-touching the app code.
+The pipeline is intentionally three separate steps (PDF → CSV → DB → app) rather than one script, so you can inspect and sanity-check the CSV before it ever touches the database, and so adding a new year never requires touching the app code.
 
 ---
 
-## Running locally
+## Running Locally
 
 ```bash
 python -m venv venv
@@ -69,7 +83,7 @@ Open **http://localhost:5000**.
 
 ---
 
-## Adding a new year (e.g. 2025)
+## Adding a New Year (e.g. 2025)
 
 1. Get the official AP EAPCET "Last Rank Details" PDF for that year.
 2. Place it in `data/pdfs/2025/` (create the folder).
@@ -77,49 +91,34 @@ Open **http://localhost:5000**.
    ```bash
    python scripts/pdf_to_csv.py --year 2025
    ```
-   This writes `data/csv/eapcet_2025.csv`. Open it and spot-check a few rows
-   against the PDF — if the source PDF's table layout changed columns, the
-   script will print a warning per malformed row rather than silently
-   writing bad data.
+   This writes `data/csv/eapcet_2025.csv`. Open it and spot-check a few rows against the PDF — if the source PDF's table layout changed columns, the script will print a warning per malformed row rather than silently writing bad data.
 4. Load it into the database:
    ```bash
    python scripts/csv_to_db.py
    ```
-   (No `--rebuild` needed — this only replaces rows for the year(s) you're
-   loading, existing years are untouched.)
-5. Restart the app. The year selector and all dropdowns update automatically
-   from whatever years exist in the database — no frontend changes needed.
+   (No `--rebuild` needed — this only replaces rows for the year(s) you're loading, existing years are untouched.)
+5. Restart the app. The year selector and all dropdowns update automatically from whatever years exist in the database — no frontend changes needed.
 
 ---
 
-## How the predictor logic works
+## How the Predictor Logic Works
 
-Each row in the database is one (college, branch, year) combination, with
-18 columns holding the closing rank for every category × gender pair
-(`OC_BOYS`, `SC_GIRLS`, `BCA_BOYS`, etc.). A blank/NULL value means no
-candidate was admitted in that slot that year — it is excluded from results,
-not treated as rank 0.
+Each row in the database is one (college, branch, year) combination, with 18 columns holding the closing rank for every category × gender pair (`OC_BOYS`, `SC_GIRLS`, `BCA_BOYS`, etc.). A blank/NULL value means no candidate was admitted in that slot that year — it is excluded from results, not treated as rank 0.
 
-`GET /api/predict` picks the correct column based on the category + gender
-the user selected, then returns every row where:
+`GET /api/predict` picks the correct column based on the category + gender the user selected, then returns every row where:
 
 ```sql
 that_column IS NOT NULL AND that_column >= :user_rank
 ```
 
-In EAPCET, a **lower** rank number is better, and a college's "closing rank"
-is the rank of the last (worst-ranked) student who still got a seat there.
-So if the user's rank is **at or below** the closing rank, a seat was
-available at that rank last year. Results are sorted by closing rank
-ascending, so the tightest, most realistic matches surface first.
+In EAPCET, a **lower** rank number is better, and a college's "closing rank" is the rank of the last (worst-ranked) student who still got a seat there. So if the user's rank is **at or below** the closing rank, a seat was available at that rank last year. Results are sorted by closing rank ascending, so the tightest, most realistic matches surface first.
 
 ---
 
-## API reference
+## API Reference
 
 ### `GET /api/meta`
-Returns the filter options actually present in the database (years,
-districts, branches) — used to populate the dropdowns.
+Returns the filter options actually present in the database (years, districts, branches) — used to populate the dropdowns.
 
 ### `GET /api/predict`
 | param      | required | example | notes                                  |
@@ -137,37 +136,22 @@ Returns up to 200 matching rows, sorted by closing rank ascending.
 
 ## Deploying (Render, free tier, single service)
 
-This is set up to deploy as **one** web service — no separate database
-service needed, since SQLite ships as a file inside the app.
+This is set up to deploy as **one** web service — no separate database service needed, since SQLite ships as a file inside the app.
 
 1. Push this repo to GitHub.
 2. On Render: New → Web Service → connect the repo.
 3. Render will detect `render.yaml` automatically, or set manually:
    - **Build command:** `pip install -r requirements.txt && python scripts/csv_to_db.py --rebuild`
    - **Start command:** `gunicorn app:app`
-4. Deploy. The build step rebuilds `data/db/eapcet.db` from the CSVs in the
-   repo every time you deploy, so the CSV files (not the `.db` file) are
-   the source of truth — commit the CSVs, the `.db` file is disposable.
+4. Deploy. The build step rebuilds `data/db/eapcet.db` from the CSVs in the repo every time you deploy, so the CSV files (not the `.db` file) are the source of truth — commit the CSVs, the `.db` file is disposable.
 
 ### Scaling notes for when traffic grows
-- SQLite handles read-heavy traffic (this app is 100% reads after build
-  time) extremely well into the tens of thousands of requests/day on a
-  single small instance — there's no write contention to worry about here.
-- If you outgrow a single Render free instance: the natural next step is a
-  paid Render instance with more RAM/CPU (SQLite needs no extra setup), or
-  migrating `data/db/eapcet.db` to a managed Postgres and swapping the
-  `sqlite3` calls in `app.py` for `psycopg2`/`SQLAlchemy` — the query logic
-  itself doesn't need to change, only the connection layer.
-- Static assets (`static/css`, `static/js`) can be moved behind a CDN
-  (Cloudflare in front of the Render URL is free and simple) once traffic
-  justifies it.
+- SQLite handles read-heavy traffic (this app is 100% reads after build time) extremely well into the tens of thousands of requests/day on a single small instance — there's no write contention to worry about here.
+- If you outgrow a single Render free instance: the natural next step is a paid Render instance with more RAM/CPU (SQLite needs no extra setup), or migrating `data/db/eapcet.db` to a managed Postgres and swapping the `sqlite3` calls in `app.py` for `psycopg2`/`SQLAlchemy` — the query logic itself doesn't need to change, only the connection layer.
+- Static assets (`static/css`, `static/js`) can be moved behind a CDN (Cloudflare in front of the Render URL is free and simple) once traffic justifies it.
 
 ---
 
 ## Disclaimer
 
-This tool reflects **last year's official closing ranks**, not a guarantee
-of admission. Closing ranks shift every counseling year based on applicant
-volume and seat matrix changes. Always cross-check against the current
-year's official EAPCET counseling notifications before making final
-decisions.
+This tool reflects **last year's official closing ranks**, not a guarantee of admission. Closing ranks shift every counseling year based on applicant volume and seat matrix changes. Always cross-check against the current year's official EAPCET counseling notifications before making final decisions.

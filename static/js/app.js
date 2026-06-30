@@ -180,9 +180,11 @@ function renderResults(data) {
     .map((row) => `
       <tr>
         <td data-label="College">
-          <span class="college-name">${escapeHtml(row.name_of_institution)}</span>
-          <span class="college-code">${escapeHtml(row.instcode)} · ${escapeHtml(row.affl || "")}</span>
-          <span class="college-place">${escapeHtml(row.place || "")}${row.estd ? ` · est. ${row.estd}` : ""}</span>
+          <div class="college-info">
+            <span class="college-name">${escapeHtml(row.name_of_institution)}</span>
+            <span class="college-code">${escapeHtml(row.instcode)} · ${escapeHtml(row.affl || "")}</span>
+            <span class="college-place">${escapeHtml(row.place || "")}${row.estd ? ` · est. ${row.estd}` : ""}</span>
+          </div>
         </td>
         <td data-label="Branch"><span class="branch-badge">${escapeHtml(row.branch_code)}</span></td>
         <td data-label="District">${escapeHtml(row.dist || "—")}</td>

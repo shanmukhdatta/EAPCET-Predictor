@@ -424,7 +424,8 @@ select:focus-visible,
 .table-wrap {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: #fff;
   box-shadow: var(--shadow-card);
 }
@@ -458,6 +459,12 @@ select:focus-visible,
 
 .results-table tbody tr:last-child td { border-bottom: none; }
 .results-table tbody tr:hover { background: rgba(232, 146, 60, 0.06); }
+
+.college-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .college-name { font-weight: 600; color: var(--indigo-900); }
 .college-code { display: block; font-family: var(--font-mono); font-size: 11.5px; color: #8b8696; margin-top: 2px; }
@@ -536,6 +543,14 @@ select:focus-visible,
     gap: 12px;
     padding: 4px 0;
     border-bottom: none;
+  }
+  .results-table tbody td[data-label="College"] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line);
+    margin-bottom: 8px;
   }
   .results-table tbody td.num { justify-content: space-between; }
   .results-table tbody td::before {
@@ -659,3 +674,21 @@ select:focus-visible,
 }
 
 .footer-years { font-family: var(--font-mono); }
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 0 16px;
+  }
+  .about-inner {
+    gap: 32px;
+  }
+  .about-note {
+    padding: 24px 20px;
+  }
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+}

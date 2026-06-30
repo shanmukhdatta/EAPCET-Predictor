@@ -620,12 +620,42 @@ select:focus-visible,
 .footer-inner {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 13px;
+  gap: 16px;
+  font-size: 13.5px;
   color: #8b8696;
 }
 
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
 .footer-inner p { margin: 0; }
+
+.footer-developer {
+  font-size: 13px;
+  color: #6b6678;
+}
+
+.dev-link {
+  color: var(--marigold-deep) !important;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.dev-link:hover {
+  color: var(--marigold) !important;
+  text-decoration: underline;
+  opacity: 0.9;
+}
 
 .footer-years { font-family: var(--font-mono); }

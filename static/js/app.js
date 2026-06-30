@@ -55,6 +55,7 @@ const els = {
   resultsLoading: document.getElementById("results-loading"),
   yearPill: document.getElementById("year-pill"),
   footerYears: document.getElementById("footer-years"),
+  college: document.getElementById("college"),
 };
 
 function fillSelect(select, items, { value, label, placeholderKept = true } = {}) {
@@ -84,6 +85,12 @@ async function loadMeta() {
   fillSelect(els.branch, meta.branches, {
     value: (b) => b.code,
     label: (b) => branchLabel(b.code),
+    placeholderKept: true,
+  });
+
+  fillSelect(els.college, meta.colleges, {
+    value: (c) => c.code,
+    label: (c) => `${c.code} (${c.name})`,
     placeholderKept: true,
   });
 
@@ -128,12 +135,13 @@ function renderResults(data) {
   els.resultsSection.hidden = false;
   els.resultsLoading.hidden = true;
 
-  const { results, rank, category, gender, district, branch, year } = data;
+  const { results, rank, category, gender, district, branch, college, year } = data;
 
   const genderLabel = gender === "boys" ? "Boy" : "Girl";
   const scopeBits = [];
   if (district !== "ALL") scopeBits.push(district);
   if (branch !== "ALL") scopeBits.push(branch);
+  if (college !== "ALL") scopeBits.push(college);
   const scopeText = scopeBits.length ? ` · ${scopeBits.join(" · ")}` : "";
 
   els.resultsTitle.textContent = `Colleges within reach for rank ${fmtNumber(rank)}`;
@@ -185,6 +193,7 @@ els.form.addEventListener("submit", async (e) => {
   const gender = els.gender.value;
   const district = els.district.value || "ALL";
   const branch = els.branch.value || "ALL";
+  const college = els.college.value || "ALL";
   const year = els.year.value;
 
   if (!rank || Number(rank) <= 0) {
@@ -206,7 +215,7 @@ els.form.addEventListener("submit", async (e) => {
   els.resultsLoading.hidden = false;
   els.resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  const params = new URLSearchParams({ rank, category, gender, district, branch, year });
+  const params = new URLSearchParams({ rank, category, gender, district, branch, college, year });
 
   try {
     const res = await fetch(`/api/predict?${params.toString()}`);

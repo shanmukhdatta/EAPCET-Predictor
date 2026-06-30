@@ -97,12 +97,20 @@ def meta():
            WHERE branch_code IS NOT NULL AND branch_code != '' ORDER BY branch_code"""
     )]
 
+    colleges = [dict(r) for r in db.execute(
+        """SELECT instcode AS code, MIN(name_of_institution) AS name FROM colleges
+           WHERE instcode IS NOT NULL AND instcode != ''
+           GROUP BY instcode
+           ORDER BY instcode"""
+    )]
+
     return jsonify(
         years=years,
         categories=list(CATEGORY_PREFIXES.keys()),
         genders=list(GENDER_SUFFIXES.keys()),
         districts=districts,
         branches=branches,
+        colleges=colleges,
     )
 
 
@@ -128,6 +136,7 @@ def predict():
     year = request.args.get("year", "").strip()
     district = request.args.get("district", "ALL").strip()
     branch = request.args.get("branch", "ALL").strip()
+    college = request.args.get("college", "ALL").strip()
 
     if not rank_raw.isdigit():
         return jsonify(error="Please enter a valid numeric rank."), 400
@@ -161,6 +170,10 @@ def predict():
         where.append("branch_code = ?")
         params.append(branch)
 
+    if college and college != "ALL":
+        where.append("instcode = ?")
+        params.append(college)
+
     sql = f"""
         SELECT
             name_of_institution, instcode, type, dist, place, affl, estd,
@@ -180,6 +193,7 @@ def predict():
         rank=rank,
         district=district,
         branch=branch,
+        college=college,
         count=len(rows),
         results=rows,
     )

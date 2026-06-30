@@ -1,5 +1,7 @@
 # AP EAPCET College Predictor
 
+**Live Website:** [eapcet-predictor-2o1p.onrender.com](https://eapcet-predictor-2o1p.onrender.com/)
+
 An elegant, single-page web application designed for students in Andhra Pradesh to predict engineering college and branch admissions based on their AP EAPCET rank, category, and gender. The tool queries official past allotment data to display matching colleges whose closing ranks are equal to or greater than the candidate's rank.
 
 ---
@@ -15,7 +17,8 @@ The frontend is a lightweight, responsive single-page dashboard styled with a de
 ## How It Works
 
 1. **Official PDF Parsing**: The raw "Last Rank Details" PDF published by the admission board is parsed table-by-table to extract raw allotment entries.
-2. **Database Conversion**: The parsed records are loaded into a structured, indexed SQLite database containing details for each college (code, affiliation, location, fee) and category-specific closing ranks (OC, EWS, SC, ST, BC groups).
+2. **Database Conversion**: The parsed records are loaded into a structured, indexed SQLite database containing details for each college (code, affiliation, location, fee) and categ
+ory-specific closing ranks (OC, EWS, SC, ST, BC groups).
 3. **Smart Matching**: A candidate enters their rank, category, gender, and optional filters (district, branch). The predictor queries the database for rows where the candidate's rank is within (less than or equal to) the last year's closing rank for their category.
 4. **Closest Cutoff Sorting**: Results are sorted in ascending order of the closing rank, ensuring that the most realistic options (where the cutoff is closest to the candidate's rank) appear at the very top.
 

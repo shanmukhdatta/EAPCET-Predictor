@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EAPCET College Predictor — find your seat</title>
+<meta name="description" content="Enter your AP EAPCET rank and find which engineering colleges and branches you qualify for, based on official closing ranks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="grain"></div>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark">EC</span>
+        <span class="brand-text">
+          <strong>EAPCET</strong> Predictor
+        </span>
+      </a>
+      <div class="header-meta">
+        <span id="year-pill" class="pill">Rank Year 2024</span>
+        <span class="pill pill-muted">1,565 entries indexed</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <p class="eyebrow">Andhra Pradesh Engineering Admissions</p>
+        <h1 class="hero-title">
+          Your rank already<br>
+          <span class="hero-title-accent">wrote the answer.</span><br>
+          We're just reading it.
+        </h1>
+        <p class="hero-sub">
+          Enter your EAPCET rank, category, and gender — get every college and
+          branch where last year's closing rank means you'd have gotten a seat,
+          straight from the official allotment data.
+        </p>
+        <div class="hero-stat-row">
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-count="1565">0</span>
+            <span class="hero-stat-label">College&ndash;branch records</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-count="13">0</span>
+            <span class="hero-stat-label">Districts covered</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-count="69">0</span>
+            <span class="hero-stat-label">Branch codes</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREDICTOR FORM -->
+    <section class="predictor" id="predictor">
+      <div class="wrap">
+        <div class="predictor-card">
+          <div class="predictor-card-head">
+            <span class="step-tag">Enter your details</span>
+            <h2>Find your colleges</h2>
+          </div>
+
+          <form id="predict-form" class="predict-form" autocomplete="off">
+
+            <div class="field-group">
+              <label for="rank">Your EAPCET rank</label>
+              <input
+                type="number"
+                id="rank"
+                name="rank"
+                inputmode="numeric"
+                min="1"
+                placeholder="e.g. 45210"
+                required
+              >
+              <span class="field-hint">Lower rank = better. We'll show colleges whose cutoff is at or above this number.</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                  <option value="" disabled selected>Select category</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label>Gender</label>
+                <div class="segmented" id="gender-segmented">
+                  <button type="button" class="segmented-btn" data-value="boys">Boy</button>
+                  <button type="button" class="segmented-btn" data-value="girls">Girl</button>
+                </div>
+                <input type="hidden" id="gender" name="gender" required>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label for="district">District <span class="optional">(optional)</span></label>
+                <select id="district" name="district">
+                  <option value="ALL">All districts</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label for="branch">Branch <span class="optional">(optional)</span></label>
+                <select id="branch" name="branch">
+                  <option value="ALL">All branches</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label for="year">Rank year</label>
+                <select id="year" name="year"></select>
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <span>Show my colleges</span>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.75 9H14.25M14.25 9L9.75 4.5M14.25 9L9.75 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <p id="form-error" class="form-error" hidden></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="results" id="results" hidden>
+      <div class="wrap">
+        <div class="results-head">
+          <div>
+            <span class="step-tag">Your matches</span>
+            <h2 id="results-title">Colleges within reach</h2>
+          </div>
+          <div class="results-summary" id="results-summary"></div>
+        </div>
+
+        <div id="results-empty" class="results-empty" hidden>
+          <p>No colleges matched these filters for this rank.</p>
+          <p class="results-empty-sub">Try widening the district or branch filter, or double-check your category.</p>
+        </div>
+
+        <div class="table-wrap" id="table-wrap" hidden>
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>College</th>
+                <th>Branch</th>
+                <th>District</th>
+                <th>Type</th>
+                <th class="num">Closing rank</th>
+                <th class="num">Annual fee</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+
+        <div id="results-loading" class="results-loading" hidden>
+          <div class="spinner"></div>
+          <span>Matching your rank against official cutoffs…</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="about" id="about">
+      <div class="wrap about-inner">
+        <div class="about-col">
+          <span class="step-tag">How it works</span>
+          <h2>Built straight from official allotment PDFs</h2>
+          <ol class="about-steps">
+            <li>
+              <span class="about-step-num">01</span>
+              <div>
+                <strong>Source PDF</strong>
+                <p>The official AP EAPCET "Last Rank Details" notification is parsed
+                  table-cell by table-cell, preserving every column exactly as published.</p>
+              </div>
+            </li>
+            <li>
+              <span class="about-step-num">02</span>
+              <div>
+                <strong>Structured database</strong>
+                <p>Every (college, branch, category, gender) closing rank becomes a typed,
+                  indexed row in SQLite — fast enough to query instantly.</p>
+              </div>
+            </li>
+            <li>
+              <span class="about-step-num">03</span>
+              <div>
+                <strong>Your prediction</strong>
+                <p>We compare your rank against last year's closing ranks. A rank at or
+                  below the cutoff means a seat was available at that rank last year.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <div class="about-col about-note">
+          <span class="step-tag">Read this first</span>
+          <h3>This is a guide, not a guarantee</h3>
+          <p>
+            Closing ranks shift every year with the number of applicants, seat
+            matrix changes, and new colleges entering the counseling process.
+            Use this tool to shortlist realistic options — always cross-check
+            against the current year's official EAPCET counseling schedule
+            before making final choices.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p>Built on official AP EAPCET rank data. Not affiliated with APSCHE or the EAPCET convener.</p>
+      <p class="footer-years">Currently indexed: <span id="footer-years">2024</span></p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
